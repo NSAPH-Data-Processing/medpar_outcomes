@@ -1,4 +1,10 @@
 # Icd list created for project 20220323_MahdiehY_LongTermPM25ComponentsTemperatureMedicareCVD
+# Myocardial Infarction: ICD9-410.X0, 410.X1, ICD10-I21
+# Ischemic Stroke: ICD9-433.X1, 434.X1, 436, I63
+# Atrial Fibrillation and Flutter: ICD9-427.3, ICD10-I48
+# Heart Failure: ICD9-428, ICD10-I50
+# Overall CVD: ICD9-39X-45X, ICD10-beginning with 'I'
+
 
 # Myocardial Infarction: ICD9-410.X0, 410.X1, ICD10-I21
 mi:

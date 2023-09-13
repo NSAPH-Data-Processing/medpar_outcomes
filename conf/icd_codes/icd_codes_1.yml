@@ -1,4 +1,8 @@
 # Icd list created by Yun Wang for Yara Abu Awad's project
+# CVD (principal or 2nd diagnosis) 390.xx-429.xx 
+#I00-I99, Q20-Q28
+# Chronic obstructive pulmonary disease (principal diagnosis code) 490.xx--492.xx, 494.xx--496.xx   
+#J40, J410, J411, J449, J441, J440, J418, J42, J439, J479, J471, J670-J679
 
 cvd: 
   long_name: "Cardio Vascular Disease"

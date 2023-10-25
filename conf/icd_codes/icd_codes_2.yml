@@ -34,4 +34,4 @@ lewy_primary:
 lewy_all: 
   long_name: "Dementia with Lewy Bodies"
   icd9: ['33182']
-  icd10: ['G3183']
+  icd10: ['G3183','F023']

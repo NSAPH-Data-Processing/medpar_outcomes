@@ -13,7 +13,7 @@ def read_icd_string(icd_yml, outcome):
         ",".join([f"'{x}'" for x in icd_dict[outcome]["icd10"]])
     )
 
-    outcome_criteria = icd_dict[outcome].get("outcome_criteria", "primary")
+    outcome_criteria = icd_dict[outcome].get("outcome_criteria", "all")
 
     return outcome_criteria, icd_string
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
                         choices=["parquet", "feather", "csv"]
                        )           
     parser.add_argument("--output_prefix", 
-                    default = "./data/output/medpar_outcomes/icd_codes_4/outcomes/primary_only"
+                    default = "./data/output/medpar_outcomes/icd_codes_4/all_icd"
                    )
     args = parser.parse_args()
     

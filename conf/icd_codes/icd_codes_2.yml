@@ -1,19 +1,37 @@
 # Icd list created for project 20230701_XiaoWu_alpha-synucleinopathy
 
 # Parkinson disease: G20, G21.11, G21.19, G21.3, G21.4, G21.8, G21.9 (ICD-9: 332.0 332.1)
-pd: 
+pd_primary: 
+  long_name: "Parkinson's Disease"
+  icd9: ['3320', '3321']
+  icd10: ['G20', 'G2111', 'G2119', 'G213', 'G214', 'G218', 'G219']
+  outcome_criteria: "primary"
+
+pd_all: 
   long_name: "Parkinson's Disease"
   icd9: ['3320', '3321']
   icd10: ['G20', 'G2111', 'G2119', 'G213', 'G214', 'G218', 'G219']
 
 # Dementia in other diseases classified elsewhere (F02.80, F02.81) (ICD-9: 294.10, 294.11)
-dementia: 
+dementia_primary: 
+  long_name: "Dementia"
+  icd9: ['29410', '29411']
+  icd10: ['F0280', 'F0281']
+  outcome_criteria: "primary"
+
+dementia_all: 
   long_name: "Dementia"
   icd9: ['29410', '29411']
   icd10: ['F0280', 'F0281']
 
 # Dementia with Lewy bodies: G31.83 (ICD-9: 331.82)
-lewy: 
+lewy_primary: 
   long_name: "Dementia with Lewy Bodies"
   icd9: ['33182']
   icd10: ['G3183']
+  outcome_criteria: "primary"
+
+lewy_all: 
+  long_name: "Dementia with Lewy Bodies"
+  icd9: ['33182']
+  icd10: ['G3183','F023']

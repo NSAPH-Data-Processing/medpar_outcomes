@@ -24,8 +24,8 @@ def get_outcomes_query(outcome_criteria, icd_string, medpar_hospitalizations_pre
     if outcome_criteria == 'all':
         query = f"""
         SELECT bene_id, adm_id 
-        FROM '{file}', UNNEST(diagnoses) AS adm(diag)
-        WHERE adm.diag IN ({icd_string})
+        FROM (SELECT bene_id, adm_id, UNNEST(diagnoses) AS diag FROM '{file}')
+        WHERE diag IN ({icd_string})
         """
     elif outcome_criteria == 'primary':
         query = f"""
@@ -39,7 +39,6 @@ def get_outcomes_query(outcome_criteria, icd_string, medpar_hospitalizations_pre
         FROM '{file}'
         WHERE diagnoses[1] IN ({icd_string}) OR diagnoses[2] IN ({icd_string})
         """
-    
     print(query)
     return query
 
@@ -92,7 +91,7 @@ if __name__ == "__main__":
                         type=int
                        )
     parser.add_argument("--icd_yml",
-                        default = "./conf/icd_codes/icd_codes_1.yml"
+                        default = "./conf/icd_codes/icd_codes_4.yml"
                         )
     parser.add_argument("--medpar_hospitalizations_prefix", 
                         default = "./data/input/mbsf_medpar_denom/medpar_hospitalizations"
@@ -102,7 +101,7 @@ if __name__ == "__main__":
                         choices=["parquet", "feather", "csv"]
                        )           
     parser.add_argument("--output_prefix", 
-                    default = "./data/output/medpar_outcomes/icd_codes_1/outcomes"
+                    default = "./data/output/medpar_outcomes/icd_codes_4/all_icd"
                    )
     args = parser.parse_args()
     

@@ -1,0 +1,31 @@
+# Icd list created by Dan Mork
+# ADRD, Atrial Fibrillation, Cardiac Arrest, Acute Myocardial Infarction
+
+# Icd list created for project 20221001_DanielM_RecurrentEvents 
+
+adrd: 
+  long_name: "ADRD"
+  icd9: ['3310', '33111', '33119', '3312', '3317', '2900', '29010', '29011', '29012', '29013', '29020', '29021', '2903', '29040', '29041', '29042', '29043', '2940', '29410', '29411', '29420', '29421', '2948', '797']
+  icd10: ['F0150', 'F0151', 'F0280', 'F0281', 'F0390', 'F0391', 'F04', 'G138', 'F05', 'F061', 'F068', 'G300', 'G301', 'G308', 'G309', 'G311', 'G312', 'G3101', 'G3109', 'G94', 'R4181', 'R54']
+
+# Atrial Fib
+atrial_fib: 
+  long_name: "Atrial Fibrillation"
+  icd9: ['4273', '42731', '42732']
+  icd10: ['I48', 'I480', 'I481', 'I482', 'I483', 'I484', 'I489', 'I4891', 'I4892']
+  outcome_criteria: "primary"
+
+# Cardiac Arrest
+cardiac_arrest: 
+  long_name: "Cardiac Arrest"
+  icd9: ['4275']
+  icd10: ['I46', 'I462', 'I468', 'I469']
+  outcome_criteria: "primary"
+
+# Acute Myocard Infarc
+acute_myocard_infarc: 
+  long_name: "Acute Myocardial Infarction"
+  icd9: ['410', '4100', '41000', '41001', '41002', '4101', '41010', '41011', '41012', '4102', '41020', '41021', '41022', '4103', '41030', '41031', '41032', '4104', '41040', '41041', '41042', '4105', '41050', '41051', '41052', '4106', '41060', '41061', '41062', '4107', '41070', '41071', '41072', '4108', '41080', '41081', '41082', '4109', '41090', '41091', '41092']
+  icd10: ['I21', 'I210', 'I2101', 'I2102', 'I2109', 'I211', 'I2111', 'I2119', 'I212', 'I2121', 'I2129', 'I213', 'I214', 'I219', 'I21A', 'I21A1', 'I21A9']
+  outcome_criteria: "primary"
+  

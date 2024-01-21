@@ -91,7 +91,7 @@ if __name__ == "__main__":
                         type=int
                        )
     parser.add_argument("--icd_yml",
-                        default = "./conf/icd_codes/icd_codes_4.yml"
+                        default = "./conf/icd_codes/icd_codes_5.yml"
                         )
     parser.add_argument("--medpar_hospitalizations_prefix", 
                         default = "./data/input/mbsf_medpar_denom/medpar_hospitalizations"
@@ -101,7 +101,7 @@ if __name__ == "__main__":
                         choices=["parquet", "feather", "csv"]
                        )           
     parser.add_argument("--output_prefix", 
-                    default = "./data/output/medpar_outcomes/icd_codes_4/all_icd"
+                    default = "./data/output/medpar_outcomes/icd_codes_5/outcomes"
                    )
     args = parser.parse_args()
     

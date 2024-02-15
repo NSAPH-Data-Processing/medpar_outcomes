@@ -70,6 +70,7 @@ def main(args):
     
         print("## Writing outcomes ----")
         df = df.set_index(['bene_id'])
+        df['year'] = args.year
     
         output_file = f"{args.output_prefix}_{args.year}.{args.output_format}"
         if args.output_format == "parquet":

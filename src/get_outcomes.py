@@ -1,4 +1,5 @@
 import pandas as pd
+import pyarrow
 import duckdb
 import argparse
 import yaml
@@ -92,17 +93,17 @@ if __name__ == "__main__":
                         type=int
                        )
     parser.add_argument("--icd_yml",
-                        default = "./conf/icd_codes/icd_codes_5.yml"
+                        default = "./conf/icd_codes/icd_codes_6.yml"
                         )
     parser.add_argument("--medpar_hospitalizations_prefix", 
-                        default = "./data/input/mbsf_medpar_denom/medpar_hospitalizations"
+                        default = "./data/input/dw_legacy_medicare_00_16/adm" #"./data/input/mbsf_medpar_denom/medpar_hospitalizations"
                        )
     parser.add_argument("--output_format", 
                         default = "parquet", 
                         choices=["parquet", "feather", "csv"]
                        )           
     parser.add_argument("--output_prefix", 
-                    default = "./data/output/medpar_outcomes/icd_codes_5/outcomes"
+                    default = "./data/output/medpar_outcomes/icd_codes_6/outcomes"
                    )
     args = parser.parse_args()
     

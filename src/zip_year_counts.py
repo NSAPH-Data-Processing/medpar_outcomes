@@ -43,12 +43,8 @@ def main(args):
     query = get_query(args.denom_prefix, args.outcomes_prefix, args.year)
     df = conn.execute(query).fetchdf()
     df = df.pivot(index=['year', 'zip'], columns='outcome', values='n').fillna(0)
-    LOGGER.info(f"{outcome} shape: {df.shape}")
-    LOGGER.info(f"{outcome} head: {df.head()}")
-    
-    #df.set_index
-
-    ## join all outcomes
+    LOGGER.info(f"df shape: {df.shape}")
+    LOGGER.info(f"df head: {df.head()}")
 
     LOGGER.info("## Writing counts denom ----")
     output_file = f"{args.output_prefix}_{args.year}.{args.output_format}"
@@ -76,11 +72,11 @@ if __name__ == "__main__":
                         default = "./data/output/medpar_outcomes/icd_codes_6/outcomes"
                        )
     parser.add_argument("--output_format", 
-                        default = "csv", 
+                        default = "parquet", 
                         choices=["parquet", "feather", "csv"]
                        )   
     parser.add_argument("--output_prefix", 
-                    default = "./data/output/medpar_medpar_outcomes_denom/icd_codes_6/zip_year_counts"
+                    default = "./data/output/medpar_outcomes/icd_codes_6/zip_year_counts"
                    )
     args = parser.parse_args()
     

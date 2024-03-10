@@ -14,6 +14,7 @@ def get_query(denom_prefix, outcomes_prefix, year):
         WITH outcomes AS (
             SELECT
                 o.bene_id,
+                o.year,
                 d.zip,
                 o.outcome
             FROM
@@ -31,7 +32,7 @@ def get_query(denom_prefix, outcomes_prefix, year):
             FROM 
                 outcomes
             GROUP BY 
-                zip, year
+                zip, year, outcome
     """     
     return query
 
@@ -41,7 +42,7 @@ def main(args):
     LOGGER.info(f"preparing counts ----")
     query = get_query(args.denom_prefix, args.outcomes_prefix, args.year)
     df = conn.execute(query).fetchdf()
-    df = df.pivot(index=['year', 'zip'], columns='outcome', values='n')
+    df = df.pivot(index=['year', 'zip'], columns='outcome', values='n').fillna(0)
     LOGGER.info(f"{outcome} shape: {df.shape}")
     LOGGER.info(f"{outcome} head: {df.head()}")
     

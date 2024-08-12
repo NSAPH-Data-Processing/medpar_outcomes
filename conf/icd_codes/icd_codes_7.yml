@@ -1,0 +1,7 @@
+#icd codes for grant submission on Lewy Body Dementia 
+
+#Dementia with Lewy Bodies: G31.83 (ICD-9: 331.82)
+lewy:
+  long_name : "Dementia with Lewy Bodies"
+  icd9 : ['33182']
+  icd10 : ['G3183']

@@ -1,7 +1,21 @@
-#icd codes for grant submission on Lewy Body Dementia 
+#icd codes for grant submission on Lewy Body Dementia (LBD)
 
 #Dementia with Lewy Bodies: G31.83 (ICD-9: 331.82)
-lewy:
+dlb:
   long_name : "Dementia with Lewy Bodies"
   icd9 : ['33182']
   icd10 : ['G3183']
+
+#Parkinson Disease 
+pd: 
+  long_name: "Parkinson's Disease"
+  icd9: ['3320', '3321']
+  icd10: ['G20', 'G20A1', 'G20A2', 'G20B1', 'G20B2', 'G20C', 'G210', 'G2111', 'G2119', 'G212', 'G213', 'G214', 'G218', 'G219']
+
+#Cognitive Impairement 
+ci:
+  long_name: "Cognitive Impairment"
+  icd9: ['33183', '78093', '2900', '29010', '29011', '29012', '29013', '29020', '29021', '2903', '29040', '29041', '29042', '29043', '29410', '29411', '2949', '3310', '33111', '33119']
+  icd10: ['G3184','R412', 'R413', 'F0390', 'F0391', 'F03911', 'F03918', 'F0392', 'F0393', 'F0394', 'F05', 'F0150', 'F0151', 'F01511', 'F01518', 'F0152', 'F0153', 'F0154', 'F0280', 'F0281', 'F02811', 'F02818', 'F0282', 'F0283', 'F0284', 'F068', 'G300', 'G301', 'G308', 'G309', 'G3101', 'G3109']
+
+  

@@ -72,7 +72,7 @@ if __name__ == "__main__":
                         default = "data/output/medpar_outcomes/icd_codes_8/outcomes"
                        )  
     parser.add_argument("--output_prefix", 
-                    default = "data/output/medpar_outcomes/icd_codes_8/zcta__yearly/counts"
+                    default = "data/output/medpar_outcomes/icd_codes_8/zcta_yearly/counts"
                    )
     args = parser.parse_args()
     

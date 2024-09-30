@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument("--outcomes_prefix",
                         default = "data/output/medpar_outcomes/icd_codes_8/outcomes")
     parser.add_argument("--output_prefix",
-                        default = "data/output/medpar_outcomes/icd_codes_8/zcta__yearly/strat_counts"
+                        default = "data/output/medpar_outcomes/icd_codes_8/zcta_yearly/strat_counts"
                         )
     args = parser.parse_args()
 

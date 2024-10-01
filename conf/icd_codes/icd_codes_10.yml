@@ -1,0 +1,12 @@
+##icd codes for Antonella's Grant Data Request 
+
+bc: 
+   long_name: "Breast Cancer"
+   icd9: ["2330"]
+   icd10: ["C50"]
+   
+oc: 
+   long_name: "Ovarian Cancer"
+   icd9: ["1830"]
+   icd10: ["C56"]
+

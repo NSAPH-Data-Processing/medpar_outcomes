@@ -9,85 +9,93 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-def get_outcome_index(outcomes_prefix, adm_prefix, outcome):
+def main(args):
+
+    conn = duckdb.connect(f"duckpond_{args.outcome}.db")
+
+    LOGGER.info("Creating outcome_admissions table-----")
     query = f"""
         WITH outcomes AS (
             SELECT  bene_id, adm_id, outcome
-            FROM '{outcomes_prefix}_*.parquet'
-            WHERE outcome = '{outcome}'
-        ),
-        admissions AS (
-            SELECT 
-                o.bene_id, 
-                o.adm_id, 
-                o.outcome,
-                a.admission_date
-            FROM '{adm_prefix}_*.parquet' AS a
-            INNER JOIN outcomes AS o
-            ON a.adm_id = o.adm_id
+            FROM '{args.outcomes_prefix}_*.parquet'
+            WHERE outcome = '{args.outcome}'
         )
+        SELECT 
+            o.bene_id, 
+            o.adm_id, 
+            o.outcome,
+            a.admission_date
+        FROM '{args.adm_prefix}_*.parquet' AS a
+        INNER JOIN outcomes AS o
+        ON a.adm_id = o.adm_id  
+    """
+
+    conn.execute(f"""
+        CREATE OR REPLACE TABLE outcome_admissions AS {query}
+    """)
+
+    LOGGER.info(f"outcome_admissions num_rows: {conn.execute('SELECT COUNT(*) AS num_rows FROM outcome_admissions').fetchone()}")
+
+    LOGGER.info("Creating outcome_index table-----")
+
+    query = """
         SELECT 
             bene_id,
             adm_id,
             outcome,
             admission_date,
             ROW_NUMBER() OVER (PARTITION by bene_id ORDER BY admission_date) as outcome_index
-        FROM admissions
+        FROM outcome_admissions
     """
-    return query 
 
-
-def save_by_year(df, output_prefix, output_format):
-    years = df['year'].unique()
-
-    for year in years:
-        df_year = df[df['year'] == year]
-        output_file = f"{output_prefix}_{year}.{output_format}"
-        LOGGER.info(f"Saving data for year {year} to {output_file}")
-
-        LOGGER.info(f"Year : {year} | df_year shape : {df_year.shape}")
-        LOGGER.info(f"Year : {year} | df_year head:\n{df_year.head()}")
-
-        if output_format == "parquet":
-            df_year.to_parquet(output_file, index = False)
-        elif output_format == "feather":
-            df_year.to_feather(output_file)
-        elif output_format == "csv":
-            df_year.to_csv(output_file, index = False)
-
-        LOGGER.info(f"Data for year {year} saved to {output_file}")
-
-def main(args):
-
-    conn = duckdb.connect()
-
-    LOGGER.info("Creating outcome_index table-----")
-    query = get_outcome_index(args.outcomes_prefix, args.adm_prefix, args.outcome)
-    LOGGER.info(f"Executing the query : {query}")
-
-    conn.execute(f"CREATE TABLE outcome_index AS {query}")
+    conn.execute(f"CREATE OR REPLACE TABLE outcome_index AS {query}")
 
     LOGGER.info("Exloring Data:")
-
     LOGGER.info(f"Num Bene: {conn.execute('SELECT COUNT(DISTINCT bene_id) AS num_of_bene FROM outcome_index').fetchdf()}")
-    LOGGER.info(f"Min Admission Date : {conn.execute('SELECT MIN(adm_date) AS min_date FROM outcome_index').fetchdf()}")
-    LOGGER.info(f"Max Admission Date : {conn.execute('SELECT MAX(adm_date) AS max_date FROM outcome_index').fetchdf()}")
+    LOGGER.info(f"Min Admission Date : {conn.execute('SELECT MIN(admission_date) AS min_date FROM outcome_index').fetchdf()}")
+    LOGGER.info(f"Max Admission Date : {conn.execute('SELECT MAX(admission_date) AS max_date FROM outcome_index').fetchdf()}")
 
-    #df = conn.execute(query).fetchdf()
-    #LOGGER.info(f"df shape: {df.shape}")
-    #LOGGER.info(f"df head: {df.head()}")
+    LOGGER.info("Incorporate discharge date")
+    query = f"""
+        SELECT 
+            o.*,
+            a.discharge_date,
+            EXTRACT(YEAR FROM a.discharge_date) AS year
+        FROM outcome_index AS o
+        INNER JOIN '{args.adm_prefix}_*.parquet' AS a
+        ON o.adm_id = a.adm_id
+        ORDER BY o.bene_id, o.outcome_index
+    """
+    conn.execute(f"CREATE OR REPLACE TABLE outcome_index AS {query}")
 
-    #LOGGER.info("Saving output year-wise----")
-    #save_by_year(df, args.output_prefix, args.output_format)
+    LOGGER.info(f"outcome_index num_rows: {conn.execute('SELECT COUNT(*) AS num_rows FROM outcome_index').fetchone()}")
+    LOGGER.info(f"outcome_index head: {conn.execute('SELECT * FROM outcome_index LIMIT 5').fetchdf()}")
 
-
+    LOGGER.info("Saving output year-wise----")
+    #TODO modify range with select distinct year
+    for year in range(2000,2016 + 1):
+        conn.execute(f""" COPY (
+            SELECT 
+                o.*,
+                oi.year,
+                oi.admission_date,
+                oi.discharge_date,
+                oi.outcome_index
+            FROM '{args.outcomes_prefix}_{year}.parquet' AS o
+            INNER JOIN outcome_index AS oi
+            ON 
+                o.bene_id = oi.bene_id AND
+                o.adm_id = oi.adm_id AND 
+                o.outcome = oi.outcome
+        ) TO '{args.output_prefix}_{year}.{args.output_format}'
+        """)
     conn.close()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--outcomes_prefix", 
-                        default="./data/output/medpar_outcomes/icd_codes_11/outcomes"
+                        default="./data/intermediate/outcomes"
                         )
     parser.add_argument("--adm_prefix", 
                         default = "./data/input/dw_legacy_medicare_00_16/adm"
@@ -100,7 +108,7 @@ if __name__ == "__main__":
                         default = "cvd"
                         )  
     parser.add_argument("--output_prefix", 
-                    default = "./data/output/test/outcome_index"
+                    default = "./data/output/medpar_outcomes/icd_codes_11/cvd"
                        )
     args = parser.parse_args()
 

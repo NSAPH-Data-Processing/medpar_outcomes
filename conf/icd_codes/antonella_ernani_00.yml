@@ -1,4 +1,6 @@
-##icd-9 amnd icd-10 codes for ernani's data request
+##icd-9 and icd-10 codes for ernani's data request
+##basecamp link : https://3.basecamp.com/3348350/buckets/37668034/card_tables/cards/7688231177
+##basecamp project name : A nationwide population-based study investigating the cardiovascular effects of exposure to particulate matter α-, β-, and γ-activities and individual radionuclides
 
 cvd :
     long_name : "Total Cardiovascular Disease (CVD)"

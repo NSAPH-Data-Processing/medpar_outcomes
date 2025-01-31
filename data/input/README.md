@@ -5,6 +5,7 @@ For internal purposes:
 #ln -s /n/dominici_nsaph_l3/Lab/data/data_warehouse/dw_legacy_medicare_00_16 .
 ln -s /n/dominici_nsaph_l3/Lab/lego/medicare/mbsf_medpar_denom .
 ln -s /n/dominici_nsaph_l3/Lab/lego/medicare_legacy/mbsf_medpar_denom mbsf_medpar_denom_legacy
+ln -s /n/dominici_nsaph_l3/Lab/lego/geoboundaries/us_geoboundaries__census/us_xwalks__census/zcta2county_yearly .
 ```
 
 Valid ICD Code list: 

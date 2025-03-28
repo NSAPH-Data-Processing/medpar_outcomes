@@ -53,7 +53,6 @@ def get_outcome_query(outcome, icd_yml, hosp_prefix, year):
 
     return query
 
-
 def main(args):
 
     conn = duckdb.connect()

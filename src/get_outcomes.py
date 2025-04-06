@@ -81,7 +81,7 @@ def main(args):
         outcome_df_list.append(outcome_df)
 
     df = pd.concat(outcome_df_list)
-    #df['year'] = args.year
+    df['year'] = args.year
 
     print('##writing outcomes----')                                              
 
@@ -105,10 +105,10 @@ if __name__ == "__main__":
                         type=int
                        )
     parser.add_argument("--icd_yml",
-                        default = "./conf/icd_codes/icd_codes_11.yml"
+                        default = "./conf/icd_codes/michelle_tian_00.yml"
                         )
     parser.add_argument("--hosp_prefix", 
-                        default = "./data/input/dw_legacy_medicare_00_16/adm"
+                        default = "./data/input/mbsf_medpar_denom/inpatient"
                        )
     parser.add_argument("--outcome_criteria",
                         default = "all",

@@ -119,7 +119,7 @@ def main(args):
         outcome_df_list.append(outcome_df)
 
     df = pd.concat(outcome_df_list)
-    #df['year'] = args.year
+    df['year'] = args.year
 
     print('##writing outcomes----')                                              
 

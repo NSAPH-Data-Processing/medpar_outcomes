@@ -60,7 +60,7 @@ def main(args):
         SELECT 
             o.*,
             a.discharge_date,
-            EXTRACT(YEAR FROM a.discharge_date) AS year
+            EXTRACT(YEAR FROM a.discharge_date) AS discharge_year
         FROM outcome_index AS o
         INNER JOIN '{args.adm_prefix}_*.parquet' AS a
         ON o.adm_id = a.adm_id
@@ -70,14 +70,16 @@ def main(args):
 
     LOGGER.info(f"outcome_index num_rows: {conn.execute('SELECT COUNT(*) AS num_rows FROM outcome_index').fetchone()}")
     LOGGER.info(f"outcome_index head: {conn.execute('SELECT * FROM outcome_index LIMIT 5').fetchdf()}")
-
+    LOGGER.info("Fetching distinct years from outcomes data...")
+    LOGGER.info("# identify the unique years ----")
+    years = conn.execute(f"""SELECT DISTINCT year FROM '{args.outcomes_prefix}_*.parquet' ORDER BY year """).fetchnumpy()
+ 
     LOGGER.info("Saving output year-wise----")
-    #TODO modify range with select distinct year
-    for year in range(2000,2016 + 1):
+    for year in years['year']:
         conn.execute(f""" COPY (
             SELECT 
                 o.*,
-                oi.year,
+                oi.discharge_year,
                 oi.admission_date,
                 oi.discharge_date,
                 oi.outcome_index
@@ -87,8 +89,11 @@ def main(args):
                 o.bene_id = oi.bene_id AND
                 o.adm_id = oi.adm_id AND 
                 o.outcome = oi.outcome
+            WHERE o.year = {year}
         ) TO '{args.output_prefix}_{year}.{args.output_format}'
         """)
+
+    LOGGER.info(f"# saved outcomes file at {args.output_prefix}_{year}.parquet ----")
     conn.close()
 
 
@@ -98,17 +103,17 @@ if __name__ == "__main__":
                         default="./data/intermediate/outcomes"
                         )
     parser.add_argument("--adm_prefix", 
-                        default = "./data/input/dw_legacy_medicare_00_16/adm"
+                        default = "./data/input/mbsf_medpar_denom/inpatient"
                        )
     parser.add_argument("--output_format", 
                         default = "parquet", 
                         choices=["parquet", "feather", "csv"]
                        )         
     parser.add_argument("--outcome",
-                        default = "cvd"
+                        default = "dengue"
                         )  
     parser.add_argument("--output_prefix", 
-                    default = "./data/output/medpar_outcomes/icd_codes_11/cvd"
+                    default = "./data/output/medpar_outcomes/michelle_tian_00/dengue"
                        )
     args = parser.parse_args()
 

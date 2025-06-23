@@ -4,7 +4,7 @@
 #SBATCH -c 2 # number of cores
 #SBATCH --mem 4GB # memory per job
 #SBATCH -t 0-00:30 # time (D-HH:MM)
-#SBATCH --array=2015-2018
+#SBATCH --array=2000-2018
 
 # ===================
 #module load python

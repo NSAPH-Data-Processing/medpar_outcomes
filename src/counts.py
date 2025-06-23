@@ -1,7 +1,7 @@
 import duckdb
 import argparse
 import logging
-import pandas as pd
+import yaml
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(
@@ -11,7 +11,7 @@ logging.basicConfig(
 
 # counts at the admission-zcta level
 
-def get_zcta_yearly_counts(conn, denom_prefix, outcome_prefix, outcome_name, year, unique_zcta_prefix):
+def get_zcta_yearly_counts(denom_prefix, outcome_prefix, outcome_name, year, unique_zcta_prefix):
     query = f"""
         CREATE OR REPLACE TABLE zcta_counts_{outcome_name} AS 
         WITH outcomes AS (
@@ -21,9 +21,9 @@ def get_zcta_yearly_counts(conn, denom_prefix, outcome_prefix, outcome_name, yea
                 d.zcta,
                 '{outcome_name}' AS outcome
             FROM
-                '{args.outcome_prefix}{outcome_name}_{args.year}.parquet' AS o
+                '{outcome_prefix}{outcome_name}_{args.year}.parquet' AS o
             INNER JOIN
-                '{args.denom_prefix}_{args.year}.parquet' AS d
+                '{denom_prefix}_{args.year}.parquet' AS d
             ON
                 o.bene_id = d.bene_id AND
                 o.year = d.year
@@ -55,22 +55,30 @@ def get_zcta_yearly_counts(conn, denom_prefix, outcome_prefix, outcome_name, yea
     return query
 
 def main(args):
-    conn = duckdb.connect('duckpond.db')
+    conn = duckdb.connect(f'duckpond_{args.year}.db')
 
     #Fetch distinct outcomes 
-    LOGGER.info(f"Fetching distinct outcome from {args.outcome_prefix} ----")
-    query_outcomes = f"""
-            SELECT DISTINCT outcome 
-            FROM '{args.outcome_prefix}*_{args.year}.parquet'
-    """
+    # LOGGER.info(f"Fetching distinct outcome from {args.outcome_prefix} ----")
+    # query_outcomes = f"""
+    #         SELECT DISTINCT outcome 
+    #         FROM '{args.outcome_prefix}*_{args.year}.parquet'
+    # """
 
-    outcomes = conn.execute(query_outcomes).fetchall()
-    outcomes = [outcome[0] for outcome in outcomes]
-    LOGGER.info(f"Deteced outcomes: {outcomes}")
+    # outcomes = conn.execute(query_outcomes).fetchall()
+    # outcomes = [outcome[0] for outcome in outcomes]
+    # LOGGER.info(f"Deteced outcomes: {outcomes}")
+
+
+    #read outcome from yaml
+    with open(args.icd_yml, 'r') as f:
+        icd_dict = yaml.load(f, Loader=yaml.FullLoader)
+
+    outcomes = list(icd_dict.keys())
+    print(outcomes)
 
     # create intermediate tables for each outcome 
     for outcome in outcomes:
-        query = get_zcta_yearly_counts(conn, args.denom_prefix, args.outcome_prefix, outcome, args.year, args.unique_zcta_prefix)
+        query = get_zcta_yearly_counts(args.denom_prefix, args.outcome_prefix, outcome, args.year, args.unique_zcta_prefix)
         LOGGER.debug(f"Creating intermediate table for outcome {outcome} with query: {query}")
         conn.execute(query)
         LOGGER.info(f"Intermediate table created for outcome: {outcome}")
@@ -112,23 +120,23 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", 
-                        default = 2015, 
+                        default = 2010, 
                         type=int
                        )
+    parser.add_argument("--icd_yml",
+                        default = "./conf/icd_codes/ccw.yml"
+                        )
     parser.add_argument("--denom_prefix", 
-                        default =  "data/input/mbsf_medpar_denom_legacy/denom"  
-                       ) 
-    parser.add_argument("--inpatient_prefix", 
-                        default =  "data/input/mbsf_medpar_denom_legacy/inpatient"  
+                        default =  "data/input/mbsf_medpar_denom/denom"  
                        ) 
     parser.add_argument("--outcome_prefix", 
-                        default = "data/output/medpar_outcomes_legacy/antonella_ernani_00/"
+                        default = "data/output/medpar_outcomes/ccw/"
                        )  
     parser.add_argument("--unique_zcta_prefix", 
                         default = "data/input/zip2zcta__uds/xwalk/unique_zcta.parquet"
                        ) 
     parser.add_argument("--output_prefix", 
-                    default = "data/output/medpar_outcomes/antonella_ernani_00/zcta_yearly/counts"
+                    default = "data/output/medpar_outcomes/ccw/zcta_yearly/counts"
                    )
     args = parser.parse_args()
     

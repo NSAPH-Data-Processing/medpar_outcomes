@@ -95,14 +95,15 @@ def main(args):
     outcome_df_list = []
     for outcome in outcomes:
         print(f"Preparing {outcome}----")
-        outcome_criteria = args.outcome_criteria
+        outcome_criteria = icd_dict[outcome].get("outcome_criteria", "all")
+        first_n = icd_dict[outcome].get("first_n", 1)
 
         if outcome_criteria == "conditional":
             icd_string = None
         else:
             icd_string = read_icd_codes(args.icd_yml, outcome)
 
-        query = get_outcome_query(outcome_criteria, icd_string, args.hosp_prefix, args.year, args.first_n, args.icd_yml, outcome)
+        query = get_outcome_query(outcome_criteria, icd_string, args.hosp_prefix, args.year, first_n, args.icd_yml, outcome)
         outcome_df = conn.execute(query).fetchdf()
         
         outcome_df['outcome'] = outcome
@@ -110,7 +111,7 @@ def main(args):
         if outcome_criteria == "all":
             outcome_df['outcome_criteria'] = "all"
         elif outcome_criteria == "first_n":
-            outcome_df['outcome_criteria'] = f'first_{args.first_n}'
+            outcome_df['outcome_criteria'] = f'first_{first_n}'
         elif outcome_criteria == "conditional":
             outcome_df['outcome_criteria'] = "conditional"
             
@@ -143,26 +144,17 @@ if __name__ == "__main__":
                         type=int
                        )
     parser.add_argument("--icd_yml",
-                        default = "./conf/icd_codes/xiao_00.yml"
+                        default = "./conf/icd_codes/ccw.yml"
                         )
     parser.add_argument("--hosp_prefix", 
                         default = "./data/input/mbsf_medpar_denom/inpatient"
                        )
-    parser.add_argument("--outcome_criteria",
-                        default = "conditional",
-                        choices = ["all", "first_n","conditional"]
-                        )
-    parser.add_argument("--first_n",
-                        default = 1,
-                        type = int,
-                        help = "Number of diagnosis to consider for query"
-                        ) 
     parser.add_argument("--output_format", 
                         default = "parquet", 
                         choices=["parquet", "feather", "csv"]
                        )           
     parser.add_argument("--output_prefix", 
-                        default = "./data/output/medpar_outcomes/xiao_00/pd_lewy_outcomes"
+                        default = "data/intermediate/ccw"
                         )
     args = parser.parse_args()
     

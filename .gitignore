@@ -1,5 +1,6 @@
 ## duckdb ----
 *.db
+*.db.wal
 
 ## slurm ----
 slurm*.out

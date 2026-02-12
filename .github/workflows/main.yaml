@@ -18,7 +18,7 @@ jobs:
           cx_tenant: ${{ secrets.CX_TENANT }}
           base_uri: ${{ secrets.BASE_URI }} 
           cx_client_id: ${{ secrets.CX_CLIENT_ID }}
-          cx_client_secret: ${{ secrets.CX_CLIENT_SECRET_URC_TESTING2 }}
+          cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
           additional_params: --threshold "sast-high=1; sast-medium=1; sca-high=1; sca-medium=1; sast-low=1; sca-low=1"
   sync:
     needs: build
@@ -44,5 +44,3 @@ jobs:
         with:
           repository_name: ${{ secrets.REPO }}
           aws_region: ${{ secrets.REGION }}
-
-

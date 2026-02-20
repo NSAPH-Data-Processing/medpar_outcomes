@@ -10,4 +10,4 @@
 #module load python
 #conda activate medpar_outcomes_env
 
-python src/counts.py --year $SLURM_ARRAY_TASK_ID
+python src/daily_counts.py --year $SLURM_ARRAY_TASK_ID

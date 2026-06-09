@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Checkmarx One CLI Action
-        uses: checkmarx/ast-github-action@main #Github Action version
+        uses: checkmarx/ast-github-action@2.3.36 # Github Action version
         with:
           project_name: ${{ secrets.PROJECT_NAME }}
           cx_tenant: ${{ secrets.CX_TENANT }}

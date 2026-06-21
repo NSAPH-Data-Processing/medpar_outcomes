@@ -11,6 +11,7 @@
 #Part B (conditional2primary)
 pd :
   long_name: "Parkinson Disease"
+  outcome_criteria: "conditional"
   primary_icd9: ['3320']
   primary_icd10: ['G20', 'G20A1', 'G20A2', 'G20B1', 'G20B2', 'G20C']
   secondary_icd9: ['29410', '29411']
@@ -18,6 +19,7 @@ pd :
 
 lewy :
   long_name: "Lewy Body Dementia"
+  outcome_criteria: "conditional"
   primary_icd9: ['33182']
   primary_icd10: ['G3183']
   secondary_icd9: ['29410', '29411']

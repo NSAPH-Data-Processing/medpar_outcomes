@@ -1,13 +1,23 @@
 #!/bin/bash
 #
-#SBATCH -p serial_requeue # partition (queue)
-#SBATCH -c 2 # number of cores
-#SBATCH --mem 4GB # memory per job
-#SBATCH -t 0-00:30 # time (D-HH:MM)
-#SBATCH --array=2000-2018
+#SBATCH -p large # partition (queue)
+#SBATCH -c 4 # number of cores per job in the array
+#SBATCH --mem 32GB # total memory in the array
+#SBATCH -t 0-1:00 # time (D-HH:MM)
+#SBATCH --array=0-65
 
-# ===================
-#module load python
-#conda activate medpar_outcomes_env
+YEARS=($(seq 2000 2021))
+FREQS=(yearly weekly  daily)
 
-python src/county_counts.py --year $SLURM_ARRAY_TASK_ID
+YEAR_IDX=$(( SLURM_ARRAY_TASK_ID / 3 ))
+FREQ_IDX=$(( SLURM_ARRAY_TASK_ID % 3 ))
+
+YEAR=${YEARS[$YEAR_IDX]}
+FREQ=${FREQS[$FREQ_IDX]}
+
+echo "Running for year=$YEAR, freq=$FREQ"
+
+#activate <env_name>
+
+# Run your script with the specific year
+python src/county_counts.py --year $YEAR --temporal_freq $FREQ

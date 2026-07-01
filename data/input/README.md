@@ -1,11 +1,20 @@
 For internal purposes:
 
+Used in main scripts:
+
 ```
-#ln -s /n/dominici_nsaph_l3/Lab/projects/analytic/mbsf_medpar_denom .
-#ln -s /n/dominici_nsaph_l3/Lab/data/data_warehouse/dw_legacy_medicare_00_16 .
-ln -s /n/dominici_nsaph_l3/Lab/lego/medicare/mbsf_medpar_denom .
-ln -s /n/dominici_nsaph_l3/Lab/lego/medicare_legacy/mbsf_medpar_denom mbsf_medpar_denom_legacy
-ln -s /n/dominici_nsaph_l3/Lab/lego/geoboundaries/us_geoboundaries__census/us_xwalks__census/zcta2county_yearly .
+#mbsf_mortality_denom data (for 65+ benes without coverage requirements)
+<data-path> . 
+
+#mbsf_medpar_denom data (for FFS denom and inpatients data)
+<data-path> . 
+
+#zcta2county and state crosswalk and unique list of zcta and county and state abbrevations (fips2abbr)
+<data-path> . 
+
+#icd codes (icd-9 and icd-10 to get the full list of icd codes to get the outcome cohort)
+<data-path> . 
+
 ```
 
 Valid ICD Code list: 

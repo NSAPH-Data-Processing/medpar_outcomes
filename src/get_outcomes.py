@@ -38,24 +38,26 @@ def read_icd_codes(icd_yml, outcome, conditional=False):
         return icd_string
 
 def get_outcome_query(outcome_criteria, icd_string, hosp_prefix, year, first_n=None, icd_yml=None, outcome=None):
-    print("## Preparing query----")
-    file = f"{hosp_prefix}_{year}.parquet"
 
     if outcome_criteria == 'all':
         query = f"""
-        SELECT bene_id, adm_id
-        FROM (SELECT bene_id, adm_id, UNNEST(diagnoses) AS diag FROM '{file}')
+        SELECT bene_id, year, adm_id , admission_date, discharge_date,
+         '{outcome}' AS outcome,
+         '{outcome_criteria}' AS outcome_criteria
+        FROM (SELECT bene_id,year, adm_id, admission_date, discharge_date, UNNEST(diagnoses) AS diag FROM '{hosp_prefix}_{year}.parquet')
         WHERE diag IN ({icd_string})
-        GROUP BY bene_id, adm_id
+        GROUP BY bene_id, year, adm_id , admission_date, discharge_date
         """
 
     elif outcome_criteria == 'first_n' and first_n is not None:
         conditions = " OR ".join([f"diagnoses[{i}] IN ({icd_string})" for i in range(1, first_n + 1)])
         query = f"""
-        SELECT bene_id, adm_id
-        FROM '{file}'
+        SELECT bene_id, year, adm_id, admission_date, discharge_date,
+         '{outcome}' AS outcome,
+         'first_{first_n}' AS outcome_criteria
+        FROM '{hosp_prefix}_{year}.parquet'
         WHERE {conditions}
-        GROUP BY bene_id, adm_id
+        GROUP BY bene_id, year, adm_id , admission_date, discharge_date
         """
         
     elif outcome_criteria == "conditional":
@@ -67,103 +69,61 @@ def get_outcome_query(outcome_criteria, icd_string, hosp_prefix, year, first_n=N
             for i in range(2, max_secondary_pos + 1)
         )
         query = f"""
-        SELECT bene_id, adm_id, diagnoses, 
+        SELECT bene_id, year, adm_id, diagnoses, admission_date, discharge_date,
+        '{outcome}' AS outcome,
+        '{outcome_criteria}' AS outcome_criteria
         diagnoses[1] AS primary_dx,
         LIST_SLICE(diagnoses, 2, {max_secondary_pos}) AS secondary_dx
-        FROM '{file}'
+        FROM '{hosp_prefix}_{year}.parquet'
         WHERE diagnoses[1] IN ({primary_icd})
         AND ({secondary_conditions})
-        GROUP BY bene_id, adm_id, diagnoses
+        GROUP BY bene_id, year, adm_id, diagnoses, admission_date, discharge_date
         """
-
-    print(query)
+    LOGGER.info(f"Generated SQL query for {outcome}:\n{query}")
     return query 
 
 def main(args):
 
+    #query for data without readmission filter
     conn = duckdb.connect()
 
     LOGGER.info(f"Running query for year {args.year}...")
 
-    #read outcome from yaml
+    LOGGER.info(f"Loading ICD codes from {args.icd_yml}")
     with open(args.icd_yml, 'r') as f:
         icd_dict = yaml.load(f, Loader=yaml.FullLoader)
 
-    outcomes = list(icd_dict.keys())
-    print(outcomes)
-
-    outcome_df_list = []
-    for outcome in outcomes:
-        print(f"Preparing {outcome}----")
-        outcome_criteria = args.outcome_criteria
+    for outcome in icd_dict.keys():
+        LOGGER.info(f"Processing outcome: {outcome}")
+        outcome_criteria = icd_dict[outcome].get("outcome_criteria", "all")
+        first_n = icd_dict[outcome].get("first_n",1)
+        readmission_window = icd_dict[outcome].get("readmission_window_days",None)
 
         if outcome_criteria == "conditional":
             icd_string = None
         else:
             icd_string = read_icd_codes(args.icd_yml, outcome)
 
-        query = get_outcome_query(outcome_criteria, icd_string, args.hosp_prefix, args.year, args.first_n, args.icd_yml, outcome)
-        outcome_df = conn.execute(query).fetchdf()
-        
-        outcome_df['outcome'] = outcome
+        query = get_outcome_query(outcome_criteria, icd_string, args.hosp_prefix, args.year, first_n, args.icd_yml, outcome)
+        table = f"outcome_{outcome}_{args.year}"
+        conn.execute(f"CREATE OR REPLACE TABLE {table} AS {query}")
 
-        if outcome_criteria == "all":
-            outcome_df['outcome_criteria'] = "all"
-        elif outcome_criteria == "first_n":
-            outcome_df['outcome_criteria'] = f'first_{args.first_n}'
-        elif outcome_criteria == "conditional":
-            outcome_df['outcome_criteria'] = "conditional"
-            
-        print(outcome_df.shape)
-        print(outcome_df.head())
-        outcome_df_list.append(outcome_df)
+        LOGGER.info(f"{table} row count: {conn.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]}")
+        LOGGER.info(f"{table} head: \n{conn.execute(f'SELECT * FROM {table} limit 5').fetchdf()}")
 
-    df = pd.concat(outcome_df_list)
-    df['year'] = args.year
+        LOGGER.info(f"Writing output for {outcome}")                    
+        output_file = f"{args.output_prefix}{outcome}_{args.year}.parquet"
+        conn.execute(f"COPY {table} TO '{output_file}' (FORMAT 'parquet')")
+        LOGGER.info(f"##output file written to {output_file}")
 
-    print('##writing outcomes----')                                              
-
-    output_file = f"{args.output_prefix}_{args.year}.{args.output_format}"
-    if args.output_format == "parquet":
-        df.to_parquet(output_file,index=False)
-    elif args.output_format == "feather":
-        df.to_feather(output_file, index = False)
-    elif args.output_format == "csv":
-        df.to_csv(output_file,index=False)
-
-    LOGGER.info(f"Output file written to {output_file}")
-    
-    #close connection
     conn.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--year", 
-                        default = 2000, 
-                        type=int
-                       )
-    parser.add_argument("--icd_yml",
-                        default = "./conf/icd_codes/xiao_00.yml"
-                        )
-    parser.add_argument("--hosp_prefix", 
-                        default = "./data/input/mbsf_medpar_denom/inpatient"
-                       )
-    parser.add_argument("--outcome_criteria",
-                        default = "conditional",
-                        choices = ["all", "first_n","conditional"]
-                        )
-    parser.add_argument("--first_n",
-                        default = 1,
-                        type = int,
-                        help = "Number of diagnosis to consider for query"
-                        ) 
-    parser.add_argument("--output_format", 
-                        default = "parquet", 
-                        choices=["parquet", "feather", "csv"]
-                       )           
-    parser.add_argument("--output_prefix", 
-                        default = "./data/output/medpar_outcomes/xiao_00/pd_lewy_outcomes"
-                        )
+    parser.add_argument("--year", default = 2010, type=int)
+    parser.add_argument("--icd_yml",default = "./conf/icd_codes/michelle_yichen_00.yml")
+    parser.add_argument("--hosp_prefix", default = "./data/input/mbsf_medpar_denom/inpatient")
+    parser.add_argument("--output_prefix", default = "./data/output/medpar_outcomes/michelle_yichen_00/")
     args = parser.parse_args()
     
     main(args)

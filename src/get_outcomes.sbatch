@@ -1,13 +1,15 @@
 #!/bin/bash
 #
-#SBATCH -p fasse # partition (queue)
-#SBATCH -c 4 # number of cores
-#SBATCH --mem 24GB # memory per job
-#SBATCH -t 0-00:30 # time (D-HH:MM)
-#SBATCH --array=2000-2018
+#SBATCH -p med # partition (queue)
+#SBATCH -c 4 # number of cores per job in the array
+#SBATCH --mem 48GB # total memory in the array
+#SBATCH -t 0-02:00 # time (D-HH:MM)
+#SBATCH --array=0-21
 
-# == cluster specific lines ==
-#module load python
-#conda activate medpar_outcomes_env
-# ===================
-python src/get_outcomes.py --year $SLURM_ARRAY_TASK_ID
+YEARS=($(seq 2000 2021))
+YEAR=${YEARS[$SLURM_ARRAY_TASK_ID]}
+
+#activate <env_name>
+
+# Run your script with the specific year
+python src/get_outcomes.py --year $YEAR
